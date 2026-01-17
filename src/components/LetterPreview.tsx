@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState, useRef } from 'react';
+import { forwardRef, useEffect, useState, useRef } from 'react';
 import type { FormData } from '../types';
 
 interface LetterPreviewProps {
