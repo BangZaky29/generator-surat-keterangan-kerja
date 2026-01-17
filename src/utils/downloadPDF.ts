@@ -2,8 +2,11 @@ import React from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-export const downloadPDF = async (ref: React.RefObject<HTMLDivElement>, filename: string) => {
-  if (!ref.current) return;
+  export const downloadPDF = async (
+    ref: React.RefObject<HTMLDivElement | null>,
+    filename: string
+  ) => {
+    if (!ref.current) return;
 
   try {
     const originalElement = ref.current;
