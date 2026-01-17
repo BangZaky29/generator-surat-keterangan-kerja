@@ -27,8 +27,8 @@ const LetterPreview = forwardRef<HTMLDivElement, LetterPreviewProps>(({ data, si
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
-        // Ambil lebar container parent dikurangi padding (misal 32px atau 48px total padding)
-        const parentWidth = containerRef.current.clientWidth - 40; 
+        // Ambil lebar container parent dikurangi padding
+        const parentWidth = containerRef.current.clientWidth - 32; 
         
         // Hitung rasio scale, max 1 (jangan membesar melebihi ukuran asli di layar besar)
         const newScale = Math.min(parentWidth / A4_WIDTH_PX, 1);
@@ -36,69 +36,52 @@ const LetterPreview = forwardRef<HTMLDivElement, LetterPreviewProps>(({ data, si
       }
     };
 
-    // Initial calc
     handleResize();
-
-    // Event listener
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
-    // Outer Container: Dark background
+    // Outer Container
     <div 
       ref={containerRef}
       className="w-full bg-slate-700 rounded-xl border border-slate-600 shadow-inner flex flex-col items-center justify-start overflow-hidden pt-8 pb-8 relative min-h-[300px]"
     >
-      
-      {/* Label Preview */}
       <div className="absolute top-3 left-4 text-slate-400 text-xs font-medium uppercase tracking-widest pointer-events-none select-none z-10">
         Live Preview
       </div>
 
-      {/* 
-        Dynamic Wrapper 
-        Fungsinya: Menyediakan ruang dimensi fisik (width/height) yang akurat di DOM
-        agar tidak ada margin kosong berlebih di bawah.
-      */}
+      {/* Dynamic Scaling Wrapper */}
       <div 
         style={{ 
           width: A4_WIDTH_PX * scale, 
           height: A4_HEIGHT_PX * scale,
-          transition: 'width 0.3s ease-out, height 0.3s ease-out'
+          transition: 'width 0.2s, height 0.2s'
         }}
         className="relative bg-white shadow-2xl"
       >
-        {/* 
-          Actual A4 Element 
-          Di-scale menggunakan transform, dengan origin top-left agar pas di wrapper.
-          Added overflow-hidden to prevent content from bleeding out visually.
-        */}
+        {/* Actual A4 Content */}
         <div 
           ref={ref}
-          className="bg-white text-dark absolute top-0 left-0 origin-top-left overflow-hidden"
+          className="bg-white text-dark absolute top-0 left-0 origin-top-left overflow-hidden flex flex-col"
           style={{ 
             width: `${A4_WIDTH_PX}px`, 
             height: `${A4_HEIGHT_PX}px`,
             transform: `scale(${scale})`,
             padding: '25mm 25mm 20mm 25mm', // Margin A4
-            fontFamily: '"Times New Roman", Times, serif'
+            fontFamily: '"Times New Roman", Times, serif',
+            boxSizing: 'border-box'
           }}
         >
-          {/* --- CONTENT SURAT --- */}
-          <div className="w-full h-full flex flex-col relative">
             
-            {/* Header / Kop Surat */}
-            <div className="flex items-center gap-6 border-b-2 border-black pb-6 mb-8 shrink-0">
-              <div 
-                className="flex-shrink-0 relative flex items-center justify-center"
-                style={{ width: '100px', height: '100px' }}
-              >
+            {/* Header / Kop Surat (Fixed Height / Shrink-0) */}
+            <div className="flex items-center gap-6 border-b-2 border-black pb-6 mb-6 shrink-0">
+              <div className="shrink-0 w-[100px] h-[100px] flex items-center justify-center relative">
                  {companyLogo ? (
                     <img 
                       src={companyLogo} 
                       alt="Logo" 
-                      style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} 
+                      className="w-full h-full object-contain"
                     />
                  ) : (
                     <div className="w-full h-full rounded-full bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center text-center p-1">
@@ -120,81 +103,89 @@ const LetterPreview = forwardRef<HTMLDivElement, LetterPreviewProps>(({ data, si
               </div>
             </div>
 
-            {/* Title */}
+            {/* Title (Shrink-0) */}
             <div className="text-center mb-6 shrink-0">
               <h2 className="text-xl font-bold underline uppercase text-black">SURAT KETERANGAN KERJA</h2>
               <p className="mt-1 text-black">No. {data.letterNumber}</p>
             </div>
 
-            {/* Content Body - Added overflow-hidden to ensure it doesn't push footer out */}
-            <div className="space-y-4 text-justify leading-relaxed text-[12pt] text-black flex-1 overflow-hidden">
-              <p>Saya yang bertanda tangan dibawah ini:</p>
+            {/* Content Body (Flex-1 & Overflow Hidden) 
+                Ini kunci perbaikan: jika teks terlalu panjang, dia akan terpotong di sini
+                dan TIDAK akan mendorong footer keluar canvas. 
+            */}
+            <div className="flex-1 overflow-hidden flex flex-col text-justify leading-relaxed text-[12pt] text-black">
+                <div className="space-y-4">
+                  <p>Saya yang bertanda tangan dibawah ini:</p>
 
-              <table className="w-full">
-                <tbody>
-                  <tr>
-                    <td className="w-32 py-1 align-top">Nama</td>
-                    <td className="w-4 py-1 align-top">:</td>
-                    <td className="py-1 align-top font-bold">{data.issuerName}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-1 align-top">Jabatan</td>
-                    <td className="py-1 align-top">:</td>
-                    <td className="py-1 align-top">{data.issuerJob} {data.companyName}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-1 align-top">Alamat</td>
-                    <td className="py-1 align-top">:</td>
-                    <td className="py-1 align-top">{data.issuerAddress}</td>
-                  </tr>
-                </tbody>
-              </table>
+                  <table className="w-full">
+                    <tbody>
+                      <tr>
+                        <td className="w-32 py-1 align-top">Nama</td>
+                        <td className="w-4 py-1 align-top">:</td>
+                        <td className="py-1 align-top font-bold">{data.issuerName}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1 align-top">Jabatan</td>
+                        <td className="py-1 align-top">:</td>
+                        <td className="py-1 align-top">{data.issuerJob} {data.companyName}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1 align-top">Alamat</td>
+                        <td className="py-1 align-top">:</td>
+                        <td className="py-1 align-top">{data.issuerAddress}</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-              <p>Dengan ini menerangkan bahwa:</p>
+                  <p>Dengan ini menerangkan bahwa:</p>
 
-              <table className="w-full">
-                <tbody>
-                  <tr>
-                    <td className="w-32 py-1 align-top">Nama</td>
-                    <td className="w-4 py-1 align-top">:</td>
-                    <td className="py-1 align-top font-bold">{data.recipientName}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-1 align-top">Jabatan</td>
-                    <td className="py-1 align-top">:</td>
-                    <td className="py-1 align-top">{data.recipientJob}</td>
-                  </tr>
-                  <tr>
-                    <td className="py-1 align-top">Alamat</td>
-                    <td className="py-1 align-top">:</td>
-                    <td className="py-1 align-top">{data.recipientAddress}</td>
-                  </tr>
-                </tbody>
-              </table>
+                  <table className="w-full">
+                    <tbody>
+                      <tr>
+                        <td className="w-32 py-1 align-top">Nama</td>
+                        <td className="w-4 py-1 align-top">:</td>
+                        <td className="py-1 align-top font-bold">{data.recipientName}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1 align-top">Jabatan</td>
+                        <td className="py-1 align-top">:</td>
+                        <td className="py-1 align-top">{data.recipientJob}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1 align-top">Alamat</td>
+                        <td className="py-1 align-top">:</td>
+                        <td className="py-1 align-top">{data.recipientAddress}</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-              <p>
-                Benar-benar karyawan tetap di <strong>{data.companyName}</strong> yang bekerja sampai saat ini dengan jabatan terakhir sebagai <strong>{data.recipientJob}</strong>.
-              </p>
+                  <p>
+                    Benar-benar karyawan tetap di <strong>{data.companyName}</strong> yang bekerja sampai saat ini dengan jabatan terakhir sebagai <strong>{data.recipientJob}</strong>.
+                  </p>
 
-              <p>
-                Surat Keterangan Kerja ini diterbitkan untuk keperluan: <strong>{data.purpose}</strong> oleh saudari {data.recipientName}.
-              </p>
+                  <p>
+                    Surat Keterangan Kerja ini diterbitkan untuk keperluan: <strong>{data.purpose}</strong> oleh saudari {data.recipientName}.
+                  </p>
 
-              <p>
-                Demikian surat keterangan ini dibuat agar dapat dipergunakan sebagaimana mestinya.
-              </p>
+                  <p>
+                    Demikian surat keterangan ini dibuat agar dapat dipergunakan sebagaimana mestinya.
+                  </p>
+                </div>
             </div>
 
-            {/* Footer / Signature - Fixed to bottom of content area */}
-            <div className="mt-auto flex justify-end shrink-0 pt-4">
+            {/* Footer / Signature (Shrink-0) 
+                Menggunakan mt-auto (otomatis ke bawah) tapi karena di dalam flex container 
+                dengan sibling flex-1, dia akan selalu terlihat di bawah area yang tersedia.
+            */}
+            <div className="shrink-0 mt-4 pt-2 flex justify-end">
               <div className="text-center w-64 relative">
                 <p className="mb-4 text-black">{data.letterPlace}, {formattedDate}</p>
                 <p className="font-bold mb-1 text-black">{data.issuerJob}</p>
                 <p className="font-bold mb-4 text-black">{data.companyName}</p>
                 
                 <div className="h-24 w-full flex items-center justify-center mb-2 relative">
-                  {/* Stamp */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 opacity-90">
+                   {/* Stamp */}
+                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 opacity-90">
                      {stamp && (
                        <img 
                         src={stamp} 
@@ -202,10 +193,10 @@ const LetterPreview = forwardRef<HTMLDivElement, LetterPreviewProps>(({ data, si
                         className="w-24 h-24 object-contain transform -rotate-12 opacity-80 mix-blend-multiply" 
                        />
                      )}
-                  </div>
+                   </div>
 
-                  {/* Signature */}
-                  <div className="relative z-20 w-full h-full flex items-center justify-center">
+                   {/* Signature */}
+                   <div className="relative z-20 w-full h-full flex items-center justify-center">
                     {signature ? (
                       <img 
                         src={signature} 
@@ -218,7 +209,7 @@ const LetterPreview = forwardRef<HTMLDivElement, LetterPreviewProps>(({ data, si
                         (Tanda Tangan)
                       </div>
                     )}
-                  </div>
+                   </div>
                 </div>
 
                 <p className="font-bold border-b border-black inline-block mt-4 px-2 pb-1 relative z-30 text-black">
@@ -226,8 +217,7 @@ const LetterPreview = forwardRef<HTMLDivElement, LetterPreviewProps>(({ data, si
                 </p>
               </div>
             </div>
-          </div>
-          {/* --- END CONTENT --- */}
+
         </div>
       </div>
     </div>
