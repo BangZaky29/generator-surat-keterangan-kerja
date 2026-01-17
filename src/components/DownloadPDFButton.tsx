@@ -12,19 +12,22 @@ const DownloadPDFButton: React.FC<DownloadPDFButtonProps> = ({ targetRef, fileNa
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
   const handleDownload = async () => {
+    if (!targetRef.current) {
+      alert("Preview belum siap untuk di-download.");
+      return;
+    }
+
     setStatus('loading');
-    
-    // Slight delay to allow UI to settle
+
+    // Sedikit delay agar UI settle
     setTimeout(async () => {
       try {
-        await downloadPDF(targetRef, fileName);
+        await downloadPDF(targetRef, fileName); // sudah aman, targetRef bisa null
         setStatus('success');
         if (onSuccess) onSuccess();
 
-        // Reset button state after 3 seconds
-        setTimeout(() => {
-          setStatus('idle');
-        }, 3000);
+        // Reset status button setelah 3 detik
+        setTimeout(() => setStatus('idle'), 3000);
       } catch (error) {
         console.error(error);
         alert("Gagal memproses PDF. Silakan coba lagi.");
