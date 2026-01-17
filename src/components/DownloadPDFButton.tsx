@@ -3,7 +3,7 @@ import { Download, Loader2, CheckCircle2 } from 'lucide-react';
 import { downloadPDF } from '../utils/downloadPDF';
 
 interface DownloadPDFButtonProps {
-  targetRef: React.RefObject<HTMLDivElement>;
+  targetRef: React.RefObject<HTMLDivElement | null>;
   fileName: string;
   onSuccess?: () => void;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef} from 'react';
 import Header from './components/Header';
 import FormInput from './components/FormInput';
 import LetterPreview from './components/LetterPreview';
@@ -41,8 +41,9 @@ const App: React.FC = () => {
   const printRef = useRef<HTMLDivElement>(null);
 
   const handleFormChange = (key: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+    setFormData((prev: FormData) => ({ ...prev, [key]: value }));
   };
+
 
   const handleSignatureChange = (newSignature: string | null) => {
     setSignature(newSignature);

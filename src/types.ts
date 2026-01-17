@@ -1,7 +1,7 @@
 // C:\codingVibes\nuansasolution\.subpath\generator-surat-keterangan-kerja\src\types.ts
 
 // types.ts
-export interface MyFormData {
+export interface FormData {
   issuerName: string;
   issuerJob: string;
   issuerAddress: string;
@@ -13,7 +13,7 @@ export interface MyFormData {
   purpose: string;
 }
 
-export const initialFormData: MyFormData = {
+export const initialFormData: FormData = {
   issuerName: "Thomas Alvian",
   issuerJob: "Direktur Utama PT. Garuda Wings",
   issuerAddress: "Jl. Gatot Subroto No.34 Medan Kota",
