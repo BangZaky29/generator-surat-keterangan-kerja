@@ -72,10 +72,11 @@ const LetterPreview = forwardRef<HTMLDivElement, LetterPreviewProps>(({ data, si
         {/* 
           Actual A4 Element 
           Di-scale menggunakan transform, dengan origin top-left agar pas di wrapper.
+          Added overflow-hidden to prevent content from bleeding out visually.
         */}
         <div 
           ref={ref}
-          className="bg-white text-dark absolute top-0 left-0 origin-top-left"
+          className="bg-white text-dark absolute top-0 left-0 origin-top-left overflow-hidden"
           style={{ 
             width: `${A4_WIDTH_PX}px`, 
             height: `${A4_HEIGHT_PX}px`,
@@ -125,8 +126,8 @@ const LetterPreview = forwardRef<HTMLDivElement, LetterPreviewProps>(({ data, si
               <p className="mt-1 text-black">No. {data.letterNumber}</p>
             </div>
 
-            {/* Content Body */}
-            <div className="space-y-4 text-justify leading-relaxed text-[12pt] text-black grow">
+            {/* Content Body - Added overflow-hidden to ensure it doesn't push footer out */}
+            <div className="space-y-4 text-justify leading-relaxed text-[12pt] text-black flex-1 overflow-hidden">
               <p>Saya yang bertanda tangan dibawah ini:</p>
 
               <table className="w-full">
@@ -184,7 +185,7 @@ const LetterPreview = forwardRef<HTMLDivElement, LetterPreviewProps>(({ data, si
               </p>
             </div>
 
-            {/* Footer / Signature */}
+            {/* Footer / Signature - Fixed to bottom of content area */}
             <div className="mt-auto flex justify-end shrink-0 pt-4">
               <div className="text-center w-64 relative">
                 <p className="mb-4 text-black">{data.letterPlace}, {formattedDate}</p>
