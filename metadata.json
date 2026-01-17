@@ -1,0 +1,5 @@
+{
+  "name": "Generator Surat Kerja",
+  "description": "Aplikasi web untuk membuat Surat Keterangan Kerja (Paklaring) secara otomatis dengan tanda tangan digital dan export PDF.",
+  "requestFramePermissions": []
+}
